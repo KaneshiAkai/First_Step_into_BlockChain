@@ -1,7 +1,8 @@
-
 #include "common.h"
 #include "blockchain.h"
 #include "hash.h"
+
+using namespace std;
 
 int main()
 {
@@ -24,5 +25,13 @@ int main()
 	Block block4 = Block(blockChain.get_latest_block().get_hash(), fourthBlockData, CalculateHash_SHA512(fourthBlockData));
 	blockChain.add_block(block4);
 
+	cout << "Blockchain created successfully!" << endl;
+    cout << "Current chain length: " << blockChain.chain_length() << endl;
+    if (blockChain.chain_length() > 0) {
+        Block latestBlock = blockChain.get_latest_block();
+        cout << "Latest block data: " << latestBlock.get_data() << endl;
+        cout << "Latest block hash: " << latestBlock.get_hash() << endl;
+        cout << "Latest block previous hash: " << latestBlock.get_prev_hash() << endl;
+    }
 	return 0;
 }
