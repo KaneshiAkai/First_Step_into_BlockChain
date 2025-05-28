@@ -51,7 +51,6 @@ int main() {
             }
         }
 
-
         if (command == "add") {
             if (argument.empty()) {
                 cout << "Error: 'add' command requires data. Usage: add <your data here>\n";
@@ -60,12 +59,13 @@ int main() {
             Block newBlock = Block(
                 blockChain.get_latest_block().get_hash(),
                 argument,
-                CalculateHash_SHA512(argument + blockChain.get_latest_block().get_hash()) // Hash nên bao gồm cả prevHash
+                CalculateHash_SHA512(argument + blockChain.get_latest_block().get_hash()) 
             );
             blockChain.add_block(newBlock);
             cout << "Block added successfully.\n";
             print_block_details(blockChain.get_latest_block(), blockChain.chain_length() - 1);
-        } else if (command == "show") {
+        } 
+        else if (command == "show") {
             if (argument.empty()) {
                 cout << "Error: 'show' command requires an index. Usage: show <index>\n";
                 continue;
@@ -76,15 +76,18 @@ int main() {
             } else {
                 cout << "Error: Index out of bounds.\n";
             }
-        } else if (command == "latest") {
+        } 
+        else if (command == "latest") { 
             if (blockChain.chain_length() > 0) {
                 print_block_details(blockChain.get_latest_block(), blockChain.chain_length() - 1);
             } else {
                 cout << "Blockchain is empty.\n";
             }
-        } else if (command == "length") {
+        } 
+        else if (command == "length") {
             cout << "Current chain length: " << blockChain.chain_length() << endl;
-        } else if (command == "print") {
+        } 
+        else if (command == "print") {
             if (blockChain.chain_length() == 0) {
                 cout << "Blockchain is empty.\n";
             } else {
@@ -92,15 +95,17 @@ int main() {
                     print_block_details(blockChain.get_block(i), i);
                 }
             }
-        } else if (command == "help") {
+        } 
+        else if (command == "help") {
             print_help();
-        } else if (command == "exit") {
+        } 
+        else if (command == "exit") {
             cout << "Exiting program.\n";
             break;
-        } else {
+        } 
+        else {
             cout << "Unknown command. Type 'help' for available commands.\n";
         }
     }
-
     return 0;
 }
