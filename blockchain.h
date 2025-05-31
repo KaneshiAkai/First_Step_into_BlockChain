@@ -7,27 +7,17 @@
 
 class BlockChain{
 public:
-	BlockChain() { // Bỏ khởi tạo _block_hash_map khỏi member initializer list
-        _head = nullptr;
-        _tail = nullptr;
-        _length = 0;
-
-        // Khởi tạo _block_hash_map trong thân constructor
-        // Điều này sẽ gọi constructor mặc định của CustomHashTable trước (nếu capacity mặc định là 100)
-        // Sau đó gán một đối tượng mới.
-        // Cách tốt hơn là CustomHashTable có một phương thức reinitialize hoặc dùng member initializer list.
-        // Tuy nhiên, để theo yêu cầu, chúng ta sẽ gán:
-        _block_hash_map = CustomHashTable(); // Gán một đối tượng CustomHashTable mới với capacity 1000
-
+	BlockChain() {
         Block genesis_data_block("**********", "First Block Ever", "**********");
-        
         Block* genesis_node = new Block(genesis_data_block); 
         genesis_node->set_index(0); 
-
         _head = genesis_node;
         _tail = genesis_node;
         _length = 1;
+        
+        _block_hash_map = CustomHashTable(); 
         _block_hash_map.insert(genesis_node->get_hash(), genesis_node); 
+
     }
 
     ~BlockChain() {
@@ -35,13 +25,11 @@ public:
         Block* next_node = nullptr;
         while (current != nullptr) {
             next_node = current->_next_block;
-            // _block_hash_map.remove(current->get_hash()); // Không cần thiết vì CustomHashTable sẽ tự dọn HashNode
-            delete current; // BlockChain chịu trách nhiệm delete Block objects
+            delete current;
             current = next_node;
         }
         _head = nullptr;
         _tail = nullptr;
-        // CustomHashTable sẽ tự dọn dẹp các HashNode trong destructor của nó.
     }
 
 	void add_block(Block newBlockData) { 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "hashtable_node.h" // Node đã định nghĩa ở trên
+#include "hashtable_node.h"
 #include "common.h"
-#include <functional> // Cho std::hash (nếu dùng hàm băm chuẩn cho string)
+#include <functional> 
 
 class CustomHashTable {
 private:
@@ -15,7 +15,7 @@ private:
         int para = getPrime(capacity);
         for (char ch : key) {
             hash_val = para * hash_val + ch;  
-            cout << "hash_val: " << para;
+            // cout << "hash_val: " << para;
         } 
         return hash_val % capacity;
     }
@@ -55,9 +55,6 @@ public:
             while (entry != nullptr) {
                 HashNode* prev = entry;
                 entry = entry->next;
-                // Quan trọng: Destructor của CustomHashTable không nên delete Block* value
-                // vì Block* được quản lý (delete) bởi BlockChain.
-                // Nó chỉ delete các HashNode mà nó đã tạo.
                 delete prev;
             }
             table[i] = nullptr;
@@ -73,19 +70,14 @@ public:
             prev = entry;
             entry = entry->next;
         }
-
-        if (entry == nullptr) { // Không tìm thấy key, thêm mới
-            entry = new HashNode(key, value);
-            if (prev == nullptr) { // Node đầu tiên trong bucket
-                table[bucket_index] = entry;
-            } else {
-                prev->next = entry;
-             }
-            current_size++;
-            // TODO: Cân nhắc việc resize (rehashing) nếu bảng quá đầy (load factor cao)
-        } else { // Tìm thấy key, cập nhật value (trong trường hợp này, không nên xảy ra với hash block duy nhất)
-            entry->value = value;
-        }
+        entry = new HashNode(key, value);
+        if (prev == nullptr) { 
+            table[bucket_index] = entry;
+        } 
+        else {
+            prev->next = entry;
+            } 
+        current_size++;
     }
 
     Block*find(const string& key) const {
@@ -98,31 +90,7 @@ public:
             }
             entry = entry->next;
         }
-        return nullptr; // Không tìm thấy
-    }
-
-    void remove(const string& key) {
-        unsigned int bucket_index = hash_function(key, capacity);
-        HashNode* prev = nullptr;
-        HashNode* entry = table[bucket_index];
-
-        while (entry != nullptr && entry->key != key) {
-            prev = entry;
-            entry = entry->next;
-        }
-
-        if (entry == nullptr) { // Không tìm thấy key
-            return;
-        } else {
-            if (prev == nullptr) { // Node cần xóa là node đầu tiên
-                table[bucket_index] = entry->next;
-            } else {
-                prev->next = entry->next;
-            }
-            // Quan trọng: Không delete entry->value ở đây
-            delete entry;
-            current_size--;
-        }
+        return nullptr;  
     }
     
     int size() const {
