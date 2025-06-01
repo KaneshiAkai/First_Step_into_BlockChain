@@ -62,14 +62,20 @@ public:
     }
 
     void insert(const string& key, Block* value) {
+        cout << "\nInserting block into HashTable." << endl;
         unsigned int bucket_index = hash_function(key, capacity);
         HashNode* prev = nullptr;
+        int node_index = 0;
         HashNode* entry = table[bucket_index];
 
         while (entry != nullptr && entry->key != key) {
+            cout << "Conflict deteced! At bucket index: " << bucket_index << endl; 
+            cout << "Considering node index " << node_index << "..." << endl;
             prev = entry;
             entry = entry->next;
+            node_index++;
         }
+        cout << "Key at bucket index: " << bucket_index << " - node " << node_index << endl;
         entry = new HashNode(key, value);
         if (prev == nullptr) { 
             table[bucket_index] = entry;
@@ -80,7 +86,7 @@ public:
         current_size++;
     }
 
-    Block*find(const string& key) const {
+    Block* find(const string& key) const {
         cout << "key: " << key << endl; 
         unsigned int bucket_index = hash_function(key, capacity);
         HashNode* entry = table[bucket_index];

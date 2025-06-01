@@ -17,7 +17,7 @@ void print_help() {
     cout << "  length           - Show the current chain length\n";
     cout << "  print            - Print all blocks in the chain\n";
     cout << "  gethash <hash>   - Get block by its hash\n"; 
-    cout << "  check            - Check blockchain integrity\n";
+    cout << "  verify           - Check blockchain integrity\n"; // Thêm lệnh verify
     cout << "  help             - Show this help message\n";
     cout << "  exit             - Exit the program\n";
     cout << "--------------------------------------------------\n";
@@ -28,7 +28,7 @@ void print_block_details(const Block& block, int index) {
     cout << "Data: " << block.get_data() << endl;
     cout << "Hash: " << block.get_hash() << endl;
     cout << "Previous Hash: " << block.get_prev_hash() << endl;
-    cout << "Nonce: " << block.get_nonce() << endl; // Hiển thị Nonce
+    cout << "Nonce: " << block.get_nonce() << endl; 
 
     // Timestamp // CÓ THAM KHẢO TỪ NGUỒN STACKOVERFLOW ĐỂ PRINT RA THỜI GIAN THỰC
     time_t raw_time = block.get_timestamp();
@@ -124,16 +124,19 @@ int main() {
                 print_block_details(b, b.get_index());
             }
         }
+        else if (command == "verify") { // Thêm xử lý lệnh verify
+            cout << "Starting blockchain integrity verification..." << endl;
+            bool is_valid = blockChain.integrity_check();
+            if (is_valid) {
+                cout << "\n✓ Blockchain verification completed successfully!" << endl;
+            } else {
+                cout << "\n✗ Blockchain verification failed! Chain may be compromised." << endl;
+            }
+        }
         else if (command == "help") {
             print_help();
         } 
-        else if (command == "check") { 
-            if (blockChain.integrity_check()) {
-                cout << "Blockchain integrity check passed.\n";
-            } else {
-                cout << "Blockchain integrity check failed.\n";
-            }
-        }
+        
         else if (command == "exit") {
             cout << "Exiting program.\n";
             break;

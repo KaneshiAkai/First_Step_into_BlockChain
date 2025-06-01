@@ -3,6 +3,7 @@
 #include "block.h" 
 #include "common.h"    
 #include "hashtable.h" 
+#include "hash.h"
 #include <iostream>      
 
 class BlockChain{
@@ -80,52 +81,76 @@ public:
         return _length;
     }
 
-// kiểm tra tính toàn venmj của chuỗi
+    // kiểm tra tính toàn venmj của chuỗi
     bool integrity_check() const {
+        cout << "\n=== BLOCKCHAIN INTEGRITY CHECK ===" << endl;
+        
         if (_head == nullptr) {
-            cout << "Blockchain is empty. \n";
+            cout << "Blockchain is empty." << endl;
+            cout << "Status: VALID (empty blockchain)" << endl;
             return true;
         }
 
-        Block* current =_head;
+        Block* current = _head;
         Block* prev = nullptr;
-
         int index = 0;
+        int total_blocks_checked = 0;
+        
+        cout << "Checking " << _length << " blocks..." << endl;
+
         while (current != nullptr) {
-            if (index >0){
-            // check hash của block hiện tại
-            string expected_hash = CalculateHash_SHA512(current->get_data_for_hashing());
-            if (current->get_hash() != expected_hash) {
-                cout << "Conflict detected at blokc "<< index << "\n";
-                cout << "Stored Hash: "<< current->get_hash() << "\n";
-                cout << "Calculated hash: " << expected_hash << "\n";
-                return false;
-
-        }
-        //check previous hash
-            if (prev != nullptr){
-                if (current->get_prev_hash() != prev->get_hash()) {
-                    cout << "Conflict detected at block "<< index << "\n";
-                    cout << "Stored previous hash: "<< current->get_prev_hash() << "\n";
-                    cout << "Actual previous hash: "<< prev->get_hash() << "\n";
+            cout << "\nChecking Block " << index << ":" << endl;
+            
+            if (index > 0) {
+                // Kiểm tra hash của block hiện tại
+                string expected_hash = CalculateHash_SHA512(current->get_data_for_hashing());
+                cout << "  - Hash verification: ";
+                if (current->get_hash() != expected_hash) {
+                    cout << "FAILED" << endl;
+                    cout << "    Stored Hash: " << current->get_hash() << endl;
+                    cout << "    Calculated Hash: " << expected_hash << endl;
+                    cout << "\nINTEGRITY CHECK RESULT: FAILED" << endl;
+                    cout << "Conflict detected at Block " << index << " - Invalid hash" << endl;
                     return false;
-
+                } 
+                else {
+                    cout << "PASSED" << endl;
                 }
-                
+
+                // Kiểm tra previous hash
+                if (prev != nullptr) {
+                    cout << "  - Previous hash verification: ";
+                    if (current->get_prev_hash() != prev->get_hash()) {
+                        cout << "FAILED" << endl;
+                        cout << "    Stored Previous Hash: " << current->get_prev_hash() << endl;
+                        cout << "    Actual Previous Hash: " << prev->get_hash() << endl;
+                        cout << "\n=== INTEGRITY CHECK RESULT: FAILED ===" << endl;
+                        cout << "Conflict detected at Block " << index << " - Previous hash mismatch" << endl;
+                        return false;
+                    } 
+                    else {
+                        cout << "PASSED" << endl;
+                    }
+                }
+            } 
+            else {
+                cout << "  - Genesis block: SKIPPED" << endl;
             }
-        }
+            total_blocks_checked++;
             prev = current;
             current = current->_next_block;
             index++;
         }
 
-        
-    cout << "No conflict detected.\n";
-    return true;
+        cout << "\n=== INTEGRITY CHECK RESULT: PASSED ===" << endl;
+        cout << "Successfully verified " << total_blocks_checked << " blocks" << endl;
+        cout << "Blockchain integrity: INTACT" << endl;
+        cout << "All blocks are properly linked and have valid hashes" << endl;
+        return true;
     }
 private:
 	Block* _head;    
     Block* _tail;    
     int _length;     
-    CustomHashTable _block_hash_map; // Sử dụng hash table tự tạo
+    CustomHashTable _block_hash_map; 
 };

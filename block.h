@@ -26,8 +26,6 @@ public:
         _timestamp = time(nullptr); 
     }
 
-    // Copy constructor (quan trọng khi BlockChain tạo node mới từ block được truyền vào)
-    // ????
     Block(const Block& other) {
         _prevBlockHash = other._prevBlockHash;
         _data = other._data;
@@ -35,11 +33,11 @@ public:
         _index = other._index;
         _timestamp = other._timestamp;
         _nonce = other._nonce;
-        _next_block = nullptr; // _next_block không nên được copy trực tiếp, nó sẽ được thiết lập bởi BlockChain
+        _next_block = nullptr;
     }
 
 
-	void set_hash(string hash_val) { // Đổi tên tham số để tránh trùng tên với thành viên
+	void set_hash(string hash_val) { 
         _hash = hash_val;
     }
 	void set_prev_hash(string prevHash_val) {
@@ -64,7 +62,6 @@ public:
 	string get_data() const {
         return _data;
     }
-    // Chỗ này được dùng để tạo chuỗi đầu vào cho việc tính hash
 	string get_data_for_hashing() const {
         return _prevBlockHash + to_string(_timestamp) + _data + to_string(_nonce); 
     }
