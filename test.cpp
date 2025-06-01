@@ -17,9 +17,9 @@ void print_help() {
     cout << "  length           - Show the current chain length\n";
     cout << "  print            - Print all blocks in the chain\n";
     cout << "  gethash <hash>   - Get block by its hash\n"; 
+    cout << "  check            - Check blockchain integrity\n";
     cout << "  help             - Show this help message\n";
     cout << "  exit             - Exit the program\n";
-    cout << "  check            - Check blockchain integrity\n";
     cout << "--------------------------------------------------\n";
 }
 
