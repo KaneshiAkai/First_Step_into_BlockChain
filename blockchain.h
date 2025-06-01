@@ -80,6 +80,49 @@ public:
         return _length;
     }
 
+// kiểm tra tính toàn venmj của chuỗi
+    bool integrity_check() const {
+        if (_head == nullptr) {
+            cout << "Blockchain is empty. \n";
+            return true;
+        }
+
+        Block* current =_head;
+        Block* prev = nullptr;
+
+        int index = 0;
+        while (current != nullptr) {
+            if (index >0){
+            // check hash của block hiện tại
+            string expected_hash = CalculateHash_SHA512(current->get_data_for_hashing());
+            if (current->get_hash() != expected_hash) {
+                cout << "Conflict detected at blokc "<< index << "\n";
+                cout << "Stored Hash: "<< current->get_hash() << "\n";
+                cout << "Calculated hash: " << expected_hash << "\n";
+                return false;
+
+        }
+        //check previous hash
+            if (prev != nullptr){
+                if (current->get_prev_hash() != prev->get_hash()) {
+                    cout << "Conflict detected at block "<< index << "\n";
+                    cout << "Stored previous hash: "<< current->get_prev_hash() << "\n";
+                    cout << "Actual previous hash: "<< prev->get_hash() << "\n";
+                    return false;
+
+                }
+                
+            }
+        }
+            prev = current;
+            current = current->_next_block;
+            index++;
+        }
+
+        
+    cout << "No conflict detected.\n";
+    return true;
+    }
 private:
 	Block* _head;    
     Block* _tail;    
