@@ -81,6 +81,10 @@ public:
         return _length;
     }
 
+    void print_hash_stats() const {
+        _block_hash_map.print_hashtable();
+    }
+
     // kiểm tra tính toàn venmj của chuỗi
     bool integrity_check() const {
         cout << "\n=== BLOCKCHAIN INTEGRITY CHECK ===" << endl;

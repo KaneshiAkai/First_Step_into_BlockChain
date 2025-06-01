@@ -17,7 +17,8 @@ void print_help() {
     cout << "  length           - Show the current chain length\n";
     cout << "  print            - Print all blocks in the chain\n";
     cout << "  gethash <hash>   - Get block by its hash\n"; 
-    cout << "  verify           - Check blockchain integrity\n"; // Thêm lệnh verify
+    cout << "  verify           - Check blockchain integrity\n";
+    cout << "  hashmap          - Show hash table content\n"; // Thêm lệnh mới
     cout << "  help             - Show this help message\n";
     cout << "  exit             - Exit the program\n";
     cout << "--------------------------------------------------\n";
@@ -128,10 +129,14 @@ int main() {
             cout << "Starting blockchain integrity verification..." << endl;
             bool is_valid = blockChain.integrity_check();
             if (is_valid) {
-                cout << "\n✓ Blockchain verification completed successfully!" << endl;
-            } else {
-                cout << "\n✗ Blockchain verification failed! Chain may be compromised." << endl;
+                cout << "\nBlockchain verification completed successfully!" << endl;
+            } 
+            else {
+                cout << "\nBlockchain verification failed! Chain may be compromised." << endl;
             }
+        }
+        else if (command == "hashmap") { // Thêm xử lý lệnh hashmap
+            blockChain.print_hash_stats();
         }
         else if (command == "help") {
             print_help();

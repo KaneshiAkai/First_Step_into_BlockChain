@@ -43,8 +43,8 @@ private:
     }
 
 public:
-    CustomHashTable(int cap = 171){
-        capacity = cap;
+    CustomHashTable(){
+        capacity = 5;
         current_size = 0;
         table.resize(capacity, nullptr);
     }
@@ -68,12 +68,15 @@ public:
         int node_index = 0;
         HashNode* entry = table[bucket_index];
 
-        while (entry != nullptr && entry->key != key) {
+        if (entry != nullptr && entry->key != key){
             cout << "Conflict deteced! At bucket index: " << bucket_index << endl; 
-            cout << "Considering node index " << node_index << "..." << endl;
+        }
+        while (entry != nullptr && entry->key != key) {
+
             prev = entry;
             entry = entry->next;
             node_index++;
+            cout << "Considering node index " << node_index << "..." << endl;
         }
         cout << "Key at bucket index: " << bucket_index << " - node " << node_index << endl;
         entry = new HashNode(key, value);
@@ -101,5 +104,35 @@ public:
     
     int size() const {
         return current_size;
+    }
+    
+    void print_hashtable() const {
+        cout << "\n HASHTABLE CONTENT " << endl;
+        cout << "Capacity: " << capacity << endl;
+        cout << "Current size: " << current_size << endl;
+        cout << "Load factor: " << (double)current_size / capacity << endl;
+        cout << "-------------------------" << endl;
+        
+        for (int i = 0; i < capacity; i++) {
+            cout << "Bucket[" << i << "]: ";
+            HashNode* entry = table[i];
+            
+            if (entry == nullptr) {
+                cout << "EMPTY" << endl;
+            } 
+            else {
+                int node_count = 0;
+                while (entry != nullptr) {
+                    if (node_count > 0) {
+                        cout << " -> ";
+                    }
+                    cout << "Node" << node_count << "(Hash: " << entry->key.substr(0, 4) << "...)";
+                    entry = entry->next;
+                    node_count++;
+                }
+                cout << " [Chain length: " << node_count << "]" << endl;
+            }
+        }
+        cout << "=========================" << endl;
     }
 };
