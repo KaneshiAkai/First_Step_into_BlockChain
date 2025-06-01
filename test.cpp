@@ -127,7 +127,7 @@ int main() {
         else if (command == "help") {
             print_help();
         } 
-            else if (command == "check") { 
+        else if (command == "check") { 
             if (blockChain.integrity_check()) {
                 cout << "Blockchain integrity check passed.\n";
             } else {
