@@ -19,6 +19,7 @@ void print_help() {
     cout << "  gethash <hash>   - Get block by its hash\n"; 
     cout << "  help             - Show this help message\n";
     cout << "  exit             - Exit the program\n";
+    cout << "  check            - Check blockchain integrity\n";
     cout << "--------------------------------------------------\n";
 }
 
@@ -126,6 +127,13 @@ int main() {
         else if (command == "help") {
             print_help();
         } 
+            else if (command == "check") { 
+            if (blockChain.integrity_check()) {
+                cout << "Blockchain integrity check passed.\n";
+            } else {
+                cout << "Blockchain integrity check failed.\n";
+            }
+        }
         else if (command == "exit") {
             cout << "Exiting program.\n";
             break;
