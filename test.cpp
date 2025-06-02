@@ -6,6 +6,7 @@
 #include <sstream> 
 #include <ctime>   
 #include <iomanip> 
+#include <random>  // For better random number generation
 
 using namespace std;
 
@@ -18,7 +19,8 @@ void print_help() {
     cout << "  print            - Print all blocks in the chain\n";
     cout << "  gethash <hash>   - Get block by its hash\n"; 
     cout << "  verify           - Check blockchain integrity\n";
-    cout << "  hashmap          - Show hash table content\n"; // Thêm lệnh mới
+    cout << "  hashmap          - Show hash table content\n";
+    cout << "  generate <n>     - Generate n blocks with random data\n";
     cout << "  help             - Show this help message\n";
     cout << "  exit             - Exit the program\n";
     cout << "--------------------------------------------------\n";
@@ -45,6 +47,7 @@ void print_block_details(const Block& block, int index) {
 int main() {
     BlockChain blockChain = BlockChain();
     cout << "Blockchain Initialized\n";
+    srand(static_cast<unsigned int>(time(nullptr)));  // Initialize random seed
     const int MINING_DIFFICULTY_DIVISOR = 149; 
     print_help();
 
@@ -137,6 +140,36 @@ int main() {
         }
         else if (command == "hashmap") { // Thêm xử lý lệnh hashmap
             blockChain.print_hash_stats();
+        }
+        else if (command == "generate") {
+            if (argument.empty()) {
+                cout << "Error: 'generate' command requires number of blocks. Usage: generate <number>\n";
+                continue;
+            }
+            int num_blocks = stoi(argument);
+            if (num_blocks <= 0) {
+                cout << "Error: Number of blocks must be positive.\n";
+                continue;
+            }
+            
+            cout << "Generating " << num_blocks << " blocks with random data...\n";
+            
+            for (int i = 0; i < num_blocks; i++) {
+                int random_num = rand() % 10000;
+                string random_data = "Random_Data_" + to_string(random_num);
+                
+                Block newBlockData(
+                    blockChain.get_latest_block().get_hash(),
+                    random_data,
+                    ""
+                );
+                
+                mine_block_divisible_sum(newBlockData, MINING_DIFFICULTY_DIVISOR);
+                blockChain.add_block(newBlockData);
+                
+                cout << "Generated block " << i + 1 << ": " << random_data << endl;
+            }
+            cout << "Block generation completed!\n";
         }
         else if (command == "help") {
             print_help();
