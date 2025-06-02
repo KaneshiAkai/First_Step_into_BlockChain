@@ -7,6 +7,7 @@
 #include <ctime>   
 #include <iomanip> 
 #include <random>  // For better random number generation
+#include <fstream>  // For file operations
 
 using namespace std;
 
@@ -21,6 +22,7 @@ void print_help() {
     cout << "  verify           - Check blockchain integrity\n";
     cout << "  hashmap          - Show hash table content\n";
     cout << "  generate <n>     - Generate n blocks with random data\n";
+    cout << "  export <file>    - Export blockchain data to CSV file\n";
     cout << "  help             - Show this help message\n";
     cout << "  exit             - Exit the program\n";
     cout << "--------------------------------------------------\n";
@@ -170,6 +172,71 @@ int main() {
                 cout << "Generated block " << i + 1 << ": " << random_data << endl;
             }
             cout << "Block generation completed!\n";
+        }
+        else if (command == "export") {
+            if (argument.empty()) {
+                cout << "Error: 'export' command requires a filename. Usage: export <filename.csv>\n";
+                continue;
+            }
+            
+            // Ensure file has .csv extension
+            string filename = argument;
+            if (filename.find(".csv") == string::npos) {
+                filename += ".csv";
+            }
+            
+            ofstream csvFile(filename);
+            if (!csvFile.is_open()) {
+                cout << "Error: Could not open file " << filename << " for writing.\n";
+                continue;
+            }
+            
+            // Write table header with separators
+            csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
+            csvFile << "| Index | Timestamp           | Data             | Hash             | Previous Hash    | Nonce |\n";
+            csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
+            
+            // Write each block's data
+            for (int i = 0; i < blockChain.chain_length(); ++i) {
+                Block b = blockChain.get_block(i);
+                
+                // Convert timestamp to readable format
+                time_t raw_time = b.get_timestamp();
+                struct tm timeinfo;
+                char buffer[80];
+                localtime_s(&timeinfo, &raw_time);
+                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
+                
+                // Format data to fit in columns
+                string data = b.get_data();
+                if (data.length() > 16) {
+                    data = data.substr(0, 13) + "...";
+                }
+                
+                string hash = b.get_hash();
+                if (hash.length() > 16) {
+                    hash = hash.substr(0, 13) + "...";
+                }
+                
+                string prev_hash = b.get_prev_hash();
+                if (prev_hash.length() > 16) {
+                    prev_hash = prev_hash.substr(0, 13) + "...";
+                }
+                
+                // Write block data with separators
+                csvFile << "| " << setw(5) << b.get_index() << " | "
+                       << setw(19) << buffer << " | "
+                       << setw(16) << data << " | "
+                       << setw(16) << hash << " | "
+                       << setw(16) << prev_hash << " | "
+                       << setw(5) << b.get_nonce() << " |\n";
+                
+                // Add separator after each row
+                csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
+            }
+            
+            csvFile.close();
+            cout << "Blockchain data exported to " << filename << " in table format" << endl;
         }
         else if (command == "help") {
             print_help();
