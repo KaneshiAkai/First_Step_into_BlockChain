@@ -1,13 +1,13 @@
 #include <iostream>
-#include "blockchain.h"
-#include "hash.h"
-#include "miner.h" 
+#include "../include/blockchain.h"
+#include "../include/hash.h"
+#include "../include/miner.h" 
 #include <string>
 #include <sstream> 
 #include <ctime>   
 #include <iomanip> 
-#include <random>  // For better random number generation
-#include <fstream>  // For file operations
+#include <random>  
+#include <fstream>  
 
 using namespace std;
 
@@ -49,7 +49,7 @@ void print_block_details(const Block& block, int index) {
 int main() {
     BlockChain blockChain = BlockChain();
     cout << "Blockchain Initialized\n";
-    srand(static_cast<unsigned int>(time(nullptr)));  // Initialize random seed
+    srand(static_cast<unsigned int>(time(nullptr))); 
     const int MINING_DIFFICULTY_DIVISOR = 149; 
     print_help();
 
@@ -81,9 +81,9 @@ int main() {
                 argument,                                
                 ""
             );
-            mine_block_divisible_sum(newBlockData, MINING_DIFFICULTY_DIVISOR); 
+            proof_of_work(newBlockData, MINING_DIFFICULTY_DIVISOR); 
             
-            blockChain.add_block(newBlockData); // BlockChain sẽ tạo node mới trên heap từ newBlockData
+            blockChain.add_block(newBlockData);
             Block latestBlockToPrint = blockChain.get_latest_block();
             print_block_details(latestBlockToPrint, latestBlockToPrint.get_index());
         } 
@@ -140,7 +140,7 @@ int main() {
                 cout << "\nBlockchain verification failed! Chain may be compromised." << endl;
             }
         }
-        else if (command == "hashmap") { // Thêm xử lý lệnh hashmap
+        else if (command == "hashmap") { 
             blockChain.print_hash_stats();
         }
         else if (command == "generate") {
@@ -166,7 +166,7 @@ int main() {
                     ""
                 );
                 
-                mine_block_divisible_sum(newBlockData, MINING_DIFFICULTY_DIVISOR);
+                proof_of_work(newBlockData, MINING_DIFFICULTY_DIVISOR);
                 blockChain.add_block(newBlockData);
                 
                 cout << "Generated block " << i + 1 << ": " << random_data << endl;
@@ -178,63 +178,52 @@ int main() {
                 cout << "Error: 'export' command requires a filename. Usage: export <filename.csv>\n";
                 continue;
             }
-            
-            // Ensure file has .csv extension
             string filename = argument;
             if (filename.find(".csv") == string::npos) {
                 filename += ".csv";
             }
-            
             ofstream csvFile(filename);
             if (!csvFile.is_open()) {
                 cout << "Error: Could not open file " << filename << " for writing.\n";
                 continue;
             }
-            
-            // Write table header with separators
+            //header
             csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
             csvFile << "| Index | Timestamp           | Data             | Hash             | Previous Hash    | Nonce |\n";
             csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
-            
-            // Write each block's data
+
             for (int i = 0; i < blockChain.chain_length(); ++i) {
                 Block b = blockChain.get_block(i);
-                
-                // Convert timestamp to readable format
+                //timne
                 time_t raw_time = b.get_timestamp();
                 struct tm timeinfo;
                 char buffer[80];
                 localtime_s(&timeinfo, &raw_time);
-                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
-                
-                // Format data to fit in columns
+                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);               
+                //data
                 string data = b.get_data();
                 if (data.length() > 16) {
                     data = data.substr(0, 13) + "...";
                 }
-                
+                //hash
                 string hash = b.get_hash();
                 if (hash.length() > 16) {
                     hash = hash.substr(0, 13) + "...";
                 }
-                
+                //prev_hash
                 string prev_hash = b.get_prev_hash();
                 if (prev_hash.length() > 16) {
                     prev_hash = prev_hash.substr(0, 13) + "...";
                 }
-                
-                // Write block data with separators
+                //separator
                 csvFile << "| " << setw(5) << b.get_index() << " | "
                        << setw(19) << buffer << " | "
                        << setw(16) << data << " | "
                        << setw(16) << hash << " | "
                        << setw(16) << prev_hash << " | "
                        << setw(5) << b.get_nonce() << " |\n";
-                
-                // Add separator after each row
                 csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
             }
-            
             csvFile.close();
             cout << "Blockchain data exported to " << filename << " in table format" << endl;
         }
