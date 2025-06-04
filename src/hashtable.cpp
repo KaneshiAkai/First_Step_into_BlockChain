@@ -1,9 +1,11 @@
 #include "../include/hashtable.h"
 
 HashTable::HashTable(){
-    capacity = 700;
+    cout << "Initializing HashTable with capacity 700..." << endl;
+    capacity = 10;
     current_size = 0;
     table.resize(capacity, nullptr);
+    cout << "HashTable initialized successfully." << endl;
 }
 
 HashTable::~HashTable() {
@@ -50,43 +52,82 @@ int HashTable::getPrime(int cap) const{
 }
 
 void HashTable::insert(const string& key, Block* value) {
-    cout << "\nInserting block into HashTable." << endl;
-    unsigned int bucket_index = hash_function(key, capacity);
-    HashNode* prev = nullptr;
-    int node_index = 0;
-    HashNode* entry = table[bucket_index];
+    if (key.empty() || value == nullptr) {
+        cout << "Error: Cannot insert null key or value." << endl;
+        return;
+    }
+    
+    cout << "Inserting block into HashTable..." << endl;
+    
+    try {
+        unsigned int bucket_index = hash_function(key, capacity);
+        
+        // Kiểm tra bounds
+        if (bucket_index >= static_cast<unsigned int>(capacity)) {
+            cout << "Error: Bucket index out of bounds!" << endl;
+            return;
+        }
+        
+        HashNode* prev = nullptr;
+        int node_index = 0;
+        HashNode* entry = table[bucket_index];
 
-    if (entry != nullptr && entry->key != key){
-        cout << "Conflict detected! At bucket index: " << bucket_index << endl; 
+        if (entry != nullptr && entry->key != key){
+            cout << "Conflict detected! At bucket index: " << bucket_index << endl; 
+        }
+        while (entry != nullptr && entry->key != key) {
+            prev = entry;
+            entry = entry->next;
+            node_index++;
+            cout << "Considering node index " << node_index << "..." << endl;
+        }
+        
+        if (entry != nullptr && entry->key == key) {
+            entry->value = value;
+            return;
+        }
+        
+        cout << "Key at bucket index: " << bucket_index << " - node " << node_index << endl;
+        entry = new HashNode(key, value);
+        if (prev == nullptr) {
+            table[bucket_index] = entry;
+        } 
+        else {
+            prev->next = entry;
+        } 
+        current_size++;
+        cout << "Block inserted successfully at bucket " << bucket_index << endl;
+    } catch (const exception& e) {
+        cout << "Error in hash table insert: " << e.what() << endl;
+        throw;
     }
-    while (entry != nullptr && entry->key != key) {
-        prev = entry;
-        entry = entry->next;
-        node_index++;
-        cout << "Considering node index " << node_index << "..." << endl;
-    }
-    cout << "Key at bucket index: " << bucket_index << " - node " << node_index << endl;
-    entry = new HashNode(key, value);
-    if (prev == nullptr) {
-        table[bucket_index] = entry;
-    } 
-    else {
-        prev->next = entry;
-    } 
-    current_size++;
 }
 
 Block* HashTable::find(const string& key) const {
-    cout << "key: " << key << endl; 
-    unsigned int bucket_index = hash_function(key, capacity);
-    HashNode* entry = table[bucket_index];
-    while (entry != nullptr) {
-        if (entry->key == key) {
-            return entry->value;
-        }
-        entry = entry->next;
+    if (key.empty()) {
+        return nullptr;
     }
-    return nullptr;  
+    
+    try {
+        unsigned int bucket_index = hash_function(key, capacity);
+        
+        if (bucket_index >= static_cast<unsigned int>(capacity)) {
+            cout << "Error: Bucket index out of bounds in find!" << endl;
+            return nullptr;
+        }
+        
+        HashNode* entry = table[bucket_index];
+        while (entry != nullptr) {
+            if (entry->key == key) {
+                return entry->value;
+            }
+            entry = entry->next;
+        }
+        return nullptr;
+    } catch (const exception& e) {
+        cout << "Error in hash table find: " << e.what() << endl;
+        return nullptr;
+    }
 }
 
 int HashTable::size() const {

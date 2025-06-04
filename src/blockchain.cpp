@@ -1,15 +1,28 @@
 #include "../include/blockchain.h"
+#include "../include/hash.h"
 
 BlockChain::BlockChain() {
-    Block genesis_data_block("**********", "First Block Ever", "**********");
-    Block* genesis_node = new Block(genesis_data_block); 
-    genesis_node->set_index(0); 
-    _head = genesis_node;
-    _tail = genesis_node;
-    _length = 1;
+    cout << "Creating genesis block..." << endl;
     
-    _block_hash_map = HashTable(); 
-    _block_hash_map.insert(genesis_node->get_hash(), genesis_node); 
+    try {
+        Block genesis_data_block("**********", "First Block Ever", "**********");
+        Block* genesis_node = new Block(genesis_data_block); 
+        genesis_node->set_index(0); 
+        _head = genesis_node;
+        _tail = genesis_node;
+        _length = 1;
+        
+        cout << "Initializing hash table..." << endl;
+        _block_hash_map = HashTable(); 
+        
+        cout << "Inserting genesis block into hash table..." << endl;
+        _block_hash_map.insert(genesis_node->get_hash(), genesis_node); 
+        
+        cout << "Blockchain constructor completed." << endl;
+    } catch (const exception& e) {
+        cout << "Error in BlockChain constructor: " << e.what() << endl;
+        throw;
+    }
 }
 
 BlockChain::~BlockChain() {
@@ -55,6 +68,10 @@ Block BlockChain::get_block(int index) const {
 }
 
 Block BlockChain::get_latest_block() const {
+    if (_tail == nullptr) {
+        cout << "Warning: Chain is empty, returning default block." << endl;
+        return Block();
+    }
     return *_tail; 
 }
 

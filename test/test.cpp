@@ -20,7 +20,7 @@ void print_help() {
     cout << "  print            - Print all blocks in the chain\n";
     cout << "  gethash <hash>   - Get block by its hash\n"; 
     cout << "  verify           - Check blockchain integrity\n";
-    cout << "  hashmap          - Show hash table content\n";
+    cout << "  hashtable          - Show hash table content\n";
     cout << "  generate <n>     - Generate n blocks with random data\n";
     cout << "  export <file>    - Export blockchain data to CSV file\n";
     cout << "  help             - Show this help message\n";
@@ -47,196 +47,248 @@ void print_block_details(const Block& block, int index) {
 }
 
 int main() {
-    BlockChain blockChain = BlockChain();
-    cout << "Blockchain Initialized\n";
-    srand(static_cast<unsigned int>(time(nullptr))); 
-    const int MINING_DIFFICULTY_DIVISOR = 149; 
-    print_help();
+    cout << "Starting program..." << endl;
+    
+    try {
+        cout << "Creating blockchain..." << endl;
+        BlockChain blockChain = BlockChain();
+        cout << "Blockchain Initialized\n";
+        
+        srand(static_cast<unsigned int>(time(nullptr))); 
+        const int MINING_DIFFICULTY_DIVISOR = 149; 
+        
+        cout << "Printing help..." << endl;
+        print_help();
 
-    string line;
-    string command;
-    string argument;
+        string line;
+        string command;
+        string argument;
 
-    while (true) {
-        cout << "\nEnter command: ";
-        getline(cin, line);
-        stringstream ss(line);
-        ss >> command; 
-        argument = ""; 
-        string temp_arg;
-        if (ss >> temp_arg) {
-            argument = temp_arg; 
-            while(ss >> temp_arg) {
-                argument += " " + temp_arg;
-            }
-        }
-
-        if (command == "add") {
-            if (argument.empty()) {
-                cout << "Error: 'add' command requires data. Usage: add <your data here>\n";
-                continue;
-            }
-            Block newBlockData(
-                blockChain.get_latest_block().get_hash(), 
-                argument,                                
-                ""
-            );
-            proof_of_work(newBlockData, MINING_DIFFICULTY_DIVISOR); 
+        while (true) {
+            cout << "\nEnter command: ";
+            getline(cin, line);
             
-            blockChain.add_block(newBlockData);
-            Block latestBlockToPrint = blockChain.get_latest_block();
-            print_block_details(latestBlockToPrint, latestBlockToPrint.get_index());
-        } 
-        else if (command == "show") {
-            if (argument.empty()) {
-                cout << "Error: 'show' command requires an index. Usage: show <index>\n";
-                continue;
+            if (line.empty()) continue;
+            
+            stringstream ss(line);
+            ss >> command; 
+            argument = ""; 
+            string temp_arg;
+            if (ss >> temp_arg) {
+                argument = temp_arg; 
+                while(ss >> temp_arg) {
+                    argument += " " + temp_arg;
+                }
             }
-            int index_val = stoi(argument);
-            Block b = blockChain.get_block(index_val); 
-            print_block_details(b, index_val); 
-        } 
-        else if (command == "latest") { 
-            if (blockChain.chain_length() > 0) {
-                Block b = blockChain.get_latest_block();
-                print_block_details(blockChain.get_latest_block(), blockChain.chain_length() - 1);
-            } else {
-                cout << "Blockchain is empty.\n"; 
-            }
-        } 
-        else if (command == "length") {
-            cout << "Current chain length: " << blockChain.chain_length() << endl;
-        } 
-        else if (command == "print") {
-            if (blockChain.chain_length() == 0) {
-                cout << "Blockchain is empty.\n";
+
+            cout << "Processing command: " << command << endl; // Debug
+
+            if (command == "add") {
+                if (argument.empty()) {
+                    cout << "Error: 'add' command requires data. Usage: add <your data here>\n";
+                    continue;
+                }
+                Block newBlockData(
+                    blockChain.get_latest_block().get_hash(), 
+                    argument,                                
+                    ""
+                );
+                proof_of_work(newBlockData, MINING_DIFFICULTY_DIVISOR); 
+                
+                blockChain.add_block(newBlockData);
+                Block latestBlockToPrint = blockChain.get_latest_block();
+                print_block_details(latestBlockToPrint, latestBlockToPrint.get_index());
             } 
-            else {
-                cout << "\n--- Blockchain ---" << endl;
-                for (int i = 0; i < blockChain.chain_length(); ++i) {
-                    Block b = blockChain.get_block(i);
+            else if (command == "show") {
+                if (argument.empty()) {
+                    cout << "Error: 'show' command requires an index. Usage: show <index>\n";
+                    continue;
+                }
+                
+                int index_val = -1;
+                try {
+                    index_val = stoi(argument);
+                } catch (const exception& e) {
+                    cout << "Error: Invalid index format. Please enter a valid number.\n";
+                    continue;
+                }
+                
+                if (index_val < 0 || index_val >= blockChain.chain_length()) {
+                    cout << "Error: Index " << index_val << " out of bounds. Chain length is " << blockChain.chain_length() << ".\n";
+                    continue;
+                }
+                
+                Block b = blockChain.get_block(index_val); 
+                print_block_details(b, index_val); 
+            } 
+            else if (command == "latest") { 
+                if (blockChain.chain_length() > 0) {
+                    Block b = blockChain.get_latest_block();
+                    print_block_details(b, blockChain.chain_length() - 1);
+                } else {
+                    cout << "Blockchain is empty.\n"; 
+                }
+            } 
+            else if (command == "length") {
+                cout << "Current chain length: " << blockChain.chain_length() << endl;
+            } 
+            else if (command == "print") {
+                if (blockChain.chain_length() == 0) {
+                    cout << "Blockchain is empty.\n";
+                } 
+                else {
+                    cout << "\n--- Blockchain ---" << endl;
+                    for (int i = 0; i < blockChain.chain_length(); ++i) {
+                        Block b = blockChain.get_block(i);
+                        print_block_details(b, b.get_index());
+                    }
+                }
+            }
+            else if (command == "gethash") { 
+                if (argument.empty()) {
+                    cout << "Error: 'gethash' command requires a hash string.\n";
+                    continue;
+                }
+                Block b = blockChain.get_block_by_hash(argument);
+                
+                if (b.is_valid()){
                     print_block_details(b, b.get_index());
                 }
             }
-        } 
-        else if (command == "gethash") { 
-            if (argument.empty()) {
-                cout << "Error: 'gethash' command requires a hash string.\n";
-                continue;
+            else if (command == "verify") {
+                cout << "Starting blockchain integrity verification..." << endl;
+                bool is_valid = blockChain.integrity_check();
+                if (is_valid) {
+                    cout << "\nBlockchain verification completed successfully!" << endl;
+                } 
+                else {
+                    cout << "\nBlockchain verification failed! Chain may be compromised." << endl;
+                }
             }
-            Block b = blockChain.get_block_by_hash(argument);
+            else if (command == "hashtable") { 
+                blockChain.print_hash_stats();
+            }
+            else if (command == "generate") {
+                if (argument.empty()) {
+                    cout << "Error: 'generate' command requires number of blocks. Usage: generate <number>\n";
+                    continue;
+                }
+                
+                int num_blocks = 0;
+                try {
+                    num_blocks = stoi(argument);
+                } catch (const exception& e) {
+                    cout << "Error: Invalid number format. Please enter a valid integer.\n";
+                    continue;
+                }
+                
+                if (num_blocks <= 0) {
+                    cout << "Error: Number of blocks must be positive.\n";
+                    continue;
+                }
+                
+                if (num_blocks > 20) {
+                    cout << "Warning: Limited to 20 blocks for safety.\n";
+                    num_blocks = 20;
+                }
+                
+                cout << "Generating " << num_blocks << " blocks with random data...\n";
+                
+                for (int i = 0; i < num_blocks; i++) {
+                    try {
+                        int random_num = rand() % 10000;
+                        string random_data = "Random_Data_" + to_string(random_num);
+                        
+                        Block newBlockData(
+                            blockChain.get_latest_block().get_hash(),
+                            random_data,
+                            ""
+                        );
+                        
+                        proof_of_work(newBlockData, MINING_DIFFICULTY_DIVISOR);
+                        blockChain.add_block(newBlockData);
+                        
+                        cout << "Generated block " << i + 1 << ": " << random_data << endl;
+                    } catch (const exception& e) {
+                        cout << "Error generating block " << (i + 1) << ": " << e.what() << endl;
+                        break;
+                    }
+                }
+                cout << "Block generation completed!\n";
+            }
+            else if (command == "export") {
+                if (argument.empty()) {
+                    cout << "Error: 'export' command requires a filename. Usage: export <filename.csv>\n";
+                    continue;
+                }
+                string filename = argument;
+                if (filename.find(".csv") == string::npos) {
+                    filename += ".csv";
+                }
+                ofstream csvFile(filename);
+                if (!csvFile.is_open()) {
+                    cout << "Error: Could not open file " << filename << " for writing.\n";
+                    continue;
+                }
+                //header
+                csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
+                csvFile << "| Index | Timestamp           | Data             | Hash             | Previous Hash    | Nonce |\n";
+                csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
+
+                for (int i = 0; i < blockChain.chain_length(); ++i) {
+                    Block b = blockChain.get_block(i);
+                    //timne
+                    time_t raw_time = b.get_timestamp();
+                    struct tm timeinfo;
+                    char buffer[80];
+                    localtime_s(&timeinfo, &raw_time);
+                    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);               
+                    //data
+                    string data = b.get_data();
+                    if (data.length() > 16) {
+                        data = data.substr(0, 13) + "...";
+                    }
+                    //hash
+                    string hash = b.get_hash();
+                    if (hash.length() > 16) {
+                        hash = hash.substr(0, 13) + "...";
+                    }
+                    //prev_hash
+                    string prev_hash = b.get_prev_hash();
+                    if (prev_hash.length() > 16) {
+                        prev_hash = prev_hash.substr(0, 13) + "...";
+                    }
+                    //separator
+                    csvFile << "| " << setw(5) << b.get_index() << " | "
+                           << setw(19) << buffer << " | "
+                           << setw(16) << data << " | "
+                           << setw(16) << hash << " | "
+                           << setw(16) << prev_hash << " | "
+                           << setw(5) << b.get_nonce() << " |\n";
+                    csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
+                }
+                csvFile.close();
+                cout << "Blockchain data exported to " << filename << " in table format" << endl;
+            }
+            else if (command == "help") {
+                print_help();
+            }
             
-            if (b.is_valid()){
-                print_block_details(b, b.get_index());
-            }
-        }
-        else if (command == "verify") { // Thêm xử lý lệnh verify
-            cout << "Starting blockchain integrity verification..." << endl;
-            bool is_valid = blockChain.integrity_check();
-            if (is_valid) {
-                cout << "\nBlockchain verification completed successfully!" << endl;
+            else if (command == "exit") {
+                cout << "Exiting program.\n";
+                break;
             } 
             else {
-                cout << "\nBlockchain verification failed! Chain may be compromised." << endl;
+                cout << "Error: Unknown command. Type 'help' for a list of commands.\n";
             }
         }
-        else if (command == "hashmap") { 
-            blockChain.print_hash_stats();
-        }
-        else if (command == "generate") {
-            if (argument.empty()) {
-                cout << "Error: 'generate' command requires number of blocks. Usage: generate <number>\n";
-                continue;
-            }
-            int num_blocks = stoi(argument);
-            if (num_blocks <= 0) {
-                cout << "Error: Number of blocks must be positive.\n";
-                continue;
-            }
-            
-            cout << "Generating " << num_blocks << " blocks with random data...\n";
-            
-            for (int i = 0; i < num_blocks; i++) {
-                int random_num = rand() % 10000;
-                string random_data = "Random_Data_" + to_string(random_num);
-                
-                Block newBlockData(
-                    blockChain.get_latest_block().get_hash(),
-                    random_data,
-                    ""
-                );
-                
-                proof_of_work(newBlockData, MINING_DIFFICULTY_DIVISOR);
-                blockChain.add_block(newBlockData);
-                
-                cout << "Generated block " << i + 1 << ": " << random_data << endl;
-            }
-            cout << "Block generation completed!\n";
-        }
-        else if (command == "export") {
-            if (argument.empty()) {
-                cout << "Error: 'export' command requires a filename. Usage: export <filename.csv>\n";
-                continue;
-            }
-            string filename = argument;
-            if (filename.find(".csv") == string::npos) {
-                filename += ".csv";
-            }
-            ofstream csvFile(filename);
-            if (!csvFile.is_open()) {
-                cout << "Error: Could not open file " << filename << " for writing.\n";
-                continue;
-            }
-            //header
-            csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
-            csvFile << "| Index | Timestamp           | Data             | Hash             | Previous Hash    | Nonce |\n";
-            csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
-
-            for (int i = 0; i < blockChain.chain_length(); ++i) {
-                Block b = blockChain.get_block(i);
-                //timne
-                time_t raw_time = b.get_timestamp();
-                struct tm timeinfo;
-                char buffer[80];
-                localtime_s(&timeinfo, &raw_time);
-                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);               
-                //data
-                string data = b.get_data();
-                if (data.length() > 16) {
-                    data = data.substr(0, 13) + "...";
-                }
-                //hash
-                string hash = b.get_hash();
-                if (hash.length() > 16) {
-                    hash = hash.substr(0, 13) + "...";
-                }
-                //prev_hash
-                string prev_hash = b.get_prev_hash();
-                if (prev_hash.length() > 16) {
-                    prev_hash = prev_hash.substr(0, 13) + "...";
-                }
-                //separator
-                csvFile << "| " << setw(5) << b.get_index() << " | "
-                       << setw(19) << buffer << " | "
-                       << setw(16) << data << " | "
-                       << setw(16) << hash << " | "
-                       << setw(16) << prev_hash << " | "
-                       << setw(5) << b.get_nonce() << " |\n";
-                csvFile << "+-------+---------------------+------------------+------------------+------------------+-------+\n";
-            }
-            csvFile.close();
-            cout << "Blockchain data exported to " << filename << " in table format" << endl;
-        }
-        else if (command == "help") {
-            print_help();
-        } 
-        
-        else if (command == "exit") {
-            cout << "Exiting program.\n";
-            break;
-        } else {
-            cout << "Error: Unknown command. Type 'help' for a list of commands.\n";
-        }
+    } catch (const exception& e) {
+        cout << "Fatal error: " << e.what() << endl;
+        return 1;
+    } catch (...) {
+        cout << "Unknown fatal error occurred!" << endl;
+        return 1;
     }
+    
     return 0;
 }

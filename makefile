@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++11 -Wall
+CFLAGS = -std=c++11 -Wall -g -O0
 INCLUDEDIRS = -I"C:/msys64/mingw64/include" -Iinclude
 LIBDIRS = -L"C:/msys64/mingw64/lib"
 LIBS = -lssl -lcrypto
@@ -47,7 +47,13 @@ debug:
 	@echo "TEST_OBJS: $(TEST_OBJS)"
 	@echo "All OBJS: $(OBJS)"
 
+# Chạy với debug mode
 run: all
+	@echo "Starting blockchain program..."
 	.\$(EXEC).exe
 
-.PHONY: all clean run debug
+# Chạy với gdb debugger nếu có
+debug-run: all
+	gdb .\$(EXEC).exe
+
+.PHONY: all clean run debug debug-run
