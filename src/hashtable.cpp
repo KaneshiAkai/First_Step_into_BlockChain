@@ -2,7 +2,7 @@
 
 HashTable::HashTable(){
     cout << "Initializing HashTable with capacity 700..." << endl;
-    capacity = 10;
+    capacity = 700;
     current_size = 0;
     table.resize(capacity, nullptr);
     cout << "HashTable initialized successfully." << endl;

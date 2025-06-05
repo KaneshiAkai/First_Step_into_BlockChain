@@ -187,11 +187,6 @@ int main() {
                     continue;
                 }
                 
-                if (num_blocks > 20) {
-                    cout << "Warning: Limited to 20 blocks for safety.\n";
-                    num_blocks = 20;
-                }
-                
                 cout << "Generating " << num_blocks << " blocks with random data...\n";
                 
                 for (int i = 0; i < num_blocks; i++) {

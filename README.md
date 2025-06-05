@@ -1,15 +1,3 @@
-# BLOCKCHAIN IMPLEMENTATION PROJECT
-
-## OVERVIEW
-
-This is a educational blockchain implementation written in C++. It features:
-- Custom hash table implementation for fast block lookup
-- Proof of Work mining algorithm
-- SHA-512 cryptographic hashing
-- Blockchain integrity verification
-- CSV export functionality
-- Interactive command-line interface
-
 ## SYSTEM REQUIREMENTS
 
 - Windows 10/11
