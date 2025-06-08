@@ -3,6 +3,7 @@
 HashTable::HashTable(){
     cout << "Initializing HashTable with capacity 700..." << endl;
     capacity = 700;
+    capacity = getPrime(capacity);
     current_size = 0;
     table.resize(capacity, nullptr);
     cout << "HashTable initialized successfully." << endl;
@@ -22,11 +23,10 @@ HashTable::~HashTable() {
 
 unsigned int HashTable::hash_function(const string& key, int capacity) const {
     unsigned int hash_val = 0; 
-    int para = getPrime(capacity);
     for (char ch : key) {           
         hash_val = capacity * hash_val + ch;  
     } 
-    return hash_val % para;
+    return hash_val % capacity;
 }
 
 bool HashTable::checkPrime(int cap) const{
@@ -60,14 +60,12 @@ void HashTable::insert(const string& key, Block* value) {
     cout << "Inserting block into HashTable..." << endl;
     
     try {
-        unsigned int bucket_index = hash_function(key, capacity);
-        
+        unsigned int bucket_index = hash_function(key, capacity); 
         // Kiểm tra bounds
         if (bucket_index >= static_cast<unsigned int>(capacity)) {
             cout << "Error: Bucket index out of bounds!" << endl;
             return;
         }
-        
         HashNode* prev = nullptr;
         int node_index = 0;
         HashNode* entry = table[bucket_index];
@@ -81,14 +79,13 @@ void HashTable::insert(const string& key, Block* value) {
             node_index++;
             cout << "Considering node index " << node_index << "..." << endl;
         }
-        
         if (entry != nullptr && entry->key == key) {
             entry->value = value;
             return;
         }
-        
         cout << "Key at bucket index: " << bucket_index << " - node " << node_index << endl;
         entry = new HashNode(key, value);
+
         if (prev == nullptr) {
             table[bucket_index] = entry;
         } 
@@ -97,7 +94,8 @@ void HashTable::insert(const string& key, Block* value) {
         } 
         current_size++;
         cout << "Block inserted successfully at bucket " << bucket_index << endl;
-    } catch (const exception& e) {
+    } 
+    catch (const exception& e) {
         cout << "Error in hash table insert: " << e.what() << endl;
         throw;
     }
